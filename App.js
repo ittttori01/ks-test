@@ -25,8 +25,11 @@ export default function App() {
             try {
                 const res = await axios.get(url + `/product/8801062883240`);
                 const { name, spec, price } = res.data;
+
+                // 가공된 데이터를 생성
                 const data = [{ name, spec, price }];
                 setExtractedData(data);
+                // 가공된 데이터를 state에 설정
             } catch (error) {
                 console.error("Error fetching price:", error);
             }
@@ -52,7 +55,7 @@ export default function App() {
     };
     return (
         <View style={styles.container}>
-            {setExtractedData ? (
+            {extractedData.length > 0 ? (
                 <View style={styles.imageContainer}>
                     <ProductTable extractedData={extractedData} />
                 </View>
