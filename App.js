@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import IconButton from "./components/IconButton";
 import CircleButton from "./components/CircleButton";
 import axios from "axios";
+import ProductTable from "./components/ProductTable";
 const url = "http://localhost:3001";
 
 const PlaceholderImage = require("./assets/background-image.png");
@@ -14,6 +15,7 @@ export default function App() {
     //create modal
     const [showAppOptions, setShowAppOPtions] = useState(false);
 
+    const [extractedData, setExtractedData] = useState([]);
     const onReset = () => {
         setShowAppOPtions(false);
     };
@@ -21,11 +23,10 @@ export default function App() {
     useEffect(() => {
         (async () => {
             try {
-                const response = await axios.get(
-                    url + `/product/8801062883240`
-                );
-                const sellPrice = Number(response.data.price);
-                alert(` ${sellPrice.toLocaleString()} 원`);
+                const res = await axios.get(url + `/product/8801062883240`);
+                const { name, spec, price } = res.data;
+                const data = [{ name, spec, price }];
+                setExtractedData(data);
             } catch (error) {
                 console.error("Error fetching price:", error);
             }
@@ -51,12 +52,19 @@ export default function App() {
     };
     return (
         <View style={styles.container}>
-            <View style={styles.imageContainer}>
-                <ImageViewer
-                    placeholderImageSource={PlaceholderImage}
-                    selectedImage={selectedImage}
-                ></ImageViewer>
-            </View>
+            {setExtractedData ? (
+                <View style={styles.imageContainer}>
+                    <ProductTable extractedData={extractedData} />
+                </View>
+            ) : (
+                <View style={styles.imageContainer}>
+                    <ImageViewer
+                        placeholderImageSource={PlaceholderImage}
+                        selectedImage={selectedImage}
+                    ></ImageViewer>
+                </View>
+            )}
+
             {showAppOptions ? (
                 <View style={styles.optionsContainer}>
                     <View style={styles.optionsRow}>

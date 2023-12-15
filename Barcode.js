@@ -25,7 +25,6 @@ export default function App() {
 
     const handleBarCodeScanned = ({ type, data }) => {
         setScanned(true);
-        alert(data);
         const price = getPrice(data.trim());
         alert(`Bar code with type ${type} and data ${price} has been scanned!`);
     };
