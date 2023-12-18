@@ -3,6 +3,7 @@ import { View, Text, Button, Image, StyleSheet } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
+import ProductTable from "./components/ProductTable";
 
 const url = "http://localhost:3001";
 
@@ -28,18 +29,24 @@ export default function App() {
     const handleBarCodeScanned = ({ type, data }) => {
         setScanned(true);
         const price = getPrice(data.trim());
-        alert(`Bar code with type ${type} and data ${price} has been scanned!`);
+        alert(data);
     };
 
     const getPrice = async (barcode) => {
         try {
-            const response = await axios.get(url + `/product/${barcode}`);
-            const { name, spec, price } = res.data;
-            const data = [{ name, spec, price }];
-            setExtractedData(data); // 콘솔에 데이터 출력 (수정 필요)
-            alert(
-                `Bar code with type ${response.data.type} and data ${response.data.price} has been scanned!`
-            );
+            const requestUrl = url + `/product/${barcode}`;
+            console.log(requestUrl);
+            await axios
+                .get(url + `/product/${barcode}`)
+                .then((res) => {
+                    const { name, spec, price } = res.data;
+                    const data = [{ name, spec, price }];
+                    setExtractedData(data);
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+            // 콘솔에 데이터 출력 (수정 필요)
         } catch (error) {
             console.error("Error fetching price:", error);
         }
@@ -62,16 +69,19 @@ export default function App() {
     return (
         <View style={styles.container}>
             {extractedData.length > 0 ? (
-                <ProductTable extractedData={extractedData} />
+                <View style={styles.imageContainer}>
+                    <ProductTable extractedData={extractedData} />
+                </View>
             ) : (
-                <BarCodeScanner
-                    onBarCodeScanned={
-                        scanned ? undefined : handleBarCodeScanned
-                    }
-                    style={styles.image} // BarCodeScanner에 직접 스타일 적용
-                />
+                <View style={styles.imageContainer}>
+                    <BarCodeScanner
+                        onBarCodeScanned={
+                            scanned ? undefined : handleBarCodeScanned
+                        }
+                        style={styles.image} // BarCodeScanner에 직접 스타일 적용
+                    />
+                </View>
             )}
-
             {scanned && (
                 <Button
                     title={"Tap to Scan Again"}

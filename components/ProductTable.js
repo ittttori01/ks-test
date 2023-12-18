@@ -3,41 +3,22 @@ import { StyleSheet } from "react-native";
 const ProductTable = ({ extractedData }) => {
     // 여기에서 테이블을 렌더링합니다.
     return (
-        <div>
-            <p style={styles.text}>품명: {extractedData[0].name}</p>
-            <p style={styles.text}>규격: {extractedData[0].spec}</p>
-            <p style={styles.text}>
-                가격:
-                {extractedData[0].price
-                    .toString()
-                    .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                원
-            </p>
-        </div>
-        // <table style={styles.tableContainer}>
-        //     <thead>
-        //         <tr>
-        //             {headers.map((header) => (
-        //                 <th key={header.text}>
-        //                     {header.text} {/* 컬럼명 바인딩 */}
-        //                 </th>
-        //             ))}
-        //         </tr>
-        //     </thead>
-        //     <tbody>
-        //         {" "}
-        //         {extractedData.map((item, index) => (
-        //             <tr key={index}>
-        //                 {/* headerKey를 순회하면서 key를 가져옴 */}
-        //                 {headerKey.map((key) => (
-        //                     <td key={key + index}>
-        //                         {item[key]} {/* key로 객체의 값을 출력 */}
-        //                     </td>
-        //                 ))}
-        //             </tr>
-        //         ))}
-        //     </tbody>
-        // </table>
+        <View style={styles.container}>
+            {extractedData.map((product, index) => (
+                <View key={index} style={styles.productContainer}>
+                    <Text style={styles.label}>제품 명:</Text>
+                    <Text style={styles.value}>{product.name}</Text>
+
+                    <Text style={styles.label}>제품 이름:</Text>
+                    <Text style={styles.value}>{product.spec}</Text>
+
+                    <Text style={styles.label}>제품 가격:</Text>
+                    <Text style={styles.value}>
+                        {Number(product.price).toLocaleString()}
+                    </Text>
+                </View>
+            ))}
+        </View>
     );
 };
 
