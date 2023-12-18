@@ -1,101 +1,92 @@
-import { StyleSheet, Text, View } from "react-native";
-import ImageViewer from "./components/ImageViewer";
-import Button from "./components/Button";
+import React, { useState, useEffect } from "react";
+import { View, Text, Button, Image, StyleSheet } from "react-native";
+import { BarCodeScanner } from "expo-barcode-scanner";
 import * as ImagePicker from "expo-image-picker";
-import { useState, useEffect } from "react";
-import IconButton from "./components/IconButton";
-import CircleButton from "./components/CircleButton";
 import axios from "axios";
-import ProductTable from "./components/ProductTable";
+
 const url = "http://localhost:3001";
 
-const PlaceholderImage = require("./assets/background-image.png");
 export default function App() {
-    const [selectedImage, setSelectedImage] = useState(null);
-    //create modal
-    const [showAppOptions, setShowAppOPtions] = useState(false);
-
+    const [hasPermission, setHasPermission] = useState(null);
+    const [scanned, setScanned] = useState(false);
+    const [image, setImage] = useState(null);
     const [extractedData, setExtractedData] = useState([]);
-    const onReset = () => {
-        setShowAppOPtions(false);
-    };
 
     useEffect(() => {
         (async () => {
-            try {
-                const res = await axios.get(url + `/product/8801062883240`);
-                const { name, spec, price } = res.data;
+            const { status } = await BarCodeScanner.requestPermissionsAsync();
+            setHasPermission(status === "granted");
 
-                // 가공된 데이터를 생성
-                const data = [{ name, spec, price }];
-                setExtractedData(data);
-                // 가공된 데이터를 state에 설정
-            } catch (error) {
-                console.error("Error fetching price:", error);
+            const imagePickerStatus =
+                await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (imagePickerStatus.status !== "granted") {
+                console.error("Camera roll permission not granted");
             }
         })();
     }, []);
 
-    const onAddSticker = () => {};
+    const handleBarCodeScanned = ({ type, data }) => {
+        setScanned(true);
+        const price = getPrice(data.trim());
+        alert(`Bar code with type ${type} and data ${price} has been scanned!`);
+    };
 
-    const onSaveImageAsync = async () => {};
+    const getPrice = async (barcode) => {
+        try {
+            const response = await axios.get(url + `/product/${barcode}`);
+            const { name, spec, price } = res.data;
+            const data = [{ name, spec, price }];
+            setExtractedData(data); // 콘솔에 데이터 출력 (수정 필요)
+            alert(
+                `Bar code with type ${response.data.type} and data ${response.data.price} has been scanned!`
+            );
+        } catch (error) {
+            console.error("Error fetching price:", error);
+        }
+    };
 
-    const pickImageAsync = async () => {
+    const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
             allowsEditing: true,
+            aspect: [4, 3],
             quality: 1,
         });
 
-        if (!result.canceled) {
-            setSelectedImage(result.assets[0].uri);
-            setShowAppOPtions(true);
-        } else {
-            alert("You did not select any image.");
+        if (!result.cancelled) {
+            setImage(result.uri);
+            setScanned(false);
         }
     };
+
     return (
         <View style={styles.container}>
             {extractedData.length > 0 ? (
-                <View style={styles.imageContainer}>
-                    <ProductTable extractedData={extractedData} />
-                </View>
+                <ProductTable extractedData={extractedData} />
             ) : (
-                <View style={styles.imageContainer}>
-                    <ImageViewer
-                        placeholderImageSource={PlaceholderImage}
-                        selectedImage={selectedImage}
-                    ></ImageViewer>
-                </View>
+                <BarCodeScanner
+                    onBarCodeScanned={
+                        scanned ? undefined : handleBarCodeScanned
+                    }
+                    style={styles.image} // BarCodeScanner에 직접 스타일 적용
+                />
             )}
 
-            {showAppOptions ? (
-                <View style={styles.optionsContainer}>
-                    <View style={styles.optionsRow}>
-                        <IconButton
-                            icon="refresh"
-                            label="Reset"
-                            onPress={onReset}
-                        />
-                        <CircleButton onPress={onAddSticker}></CircleButton>
-                        <IconButton
-                            icon="save-alt"
-                            label="Save"
-                            onPress={onSaveImageAsync}
-                        />
-                    </View>
-                </View>
-            ) : (
-                <View style={styles.footerContainer}>
-                    <Button
-                        theme="primary"
-                        label="Choose a photo"
-                        onPress={pickImageAsync}
-                    />
-                    <Button
-                        label="Use this photo"
-                        onPress={() => setShowAppOptions(true)}
-                    />
-                </View>
+            {scanned && (
+                <Button
+                    title={"Tap to Scan Again"}
+                    onPress={() => setScanned(false)}
+                />
+            )}
+            <Button
+                title="Pick an image from camera roll"
+                onPress={pickImage}
+            />
+            {image && (
+                <Image
+                    source={{ uri: image }}
+                    style={{ width: 400, height: 200 }}
+                />
             )}
         </View>
     );
@@ -116,17 +107,5 @@ const styles = StyleSheet.create({
         width: 320,
         height: 440,
         borderRadius: 18,
-    },
-    footerContainer: {
-        flex: 1 / 3,
-        alignItems: "center",
-    },
-    optionsContainer: {
-        position: "absolute",
-        bottom: 80,
-    },
-    optionsRow: {
-        alignItems: "center",
-        flexDirection: "row",
     },
 });
