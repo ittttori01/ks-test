@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 
 const ProductTable = ({ extractedData }) => {
     // 여기에서 테이블을 렌더링합니다.

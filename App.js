@@ -5,31 +5,24 @@ import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 import ProductTable from "./components/ProductTable";
 
-const url = "http://localhost:3001";
+const url = "https://e5ce-58-120-200-130.ngrok-free.app";
 
 export default function App() {
     const [hasPermission, setHasPermission] = useState(null);
     const [scanned, setScanned] = useState(false);
-    const [image, setImage] = useState(null);
     const [extractedData, setExtractedData] = useState([]);
 
     useEffect(() => {
         (async () => {
             const { status } = await BarCodeScanner.requestPermissionsAsync();
             setHasPermission(status === "granted");
-
-            const imagePickerStatus =
-                await ImagePicker.requestMediaLibraryPermissionsAsync();
-            if (imagePickerStatus.status !== "granted") {
-                console.error("Camera roll permission not granted");
-            }
         })();
     }, []);
 
     const handleBarCodeScanned = ({ type, data }) => {
         setScanned(true);
-        const price = getPrice(data.trim());
-        alert(data);
+        const barcode = getPrice(data.trim());
+        alert(barcode);
     };
 
     const getPrice = async (barcode) => {
@@ -37,7 +30,7 @@ export default function App() {
             const requestUrl = url + `/product/${barcode}`;
             console.log(requestUrl);
             await axios
-                .get(url + `/product/${barcode}`)
+                .get(requestUrl)
                 .then((res) => {
                     const { name, spec, price } = res.data;
                     const data = [{ name, spec, price }];
@@ -49,20 +42,6 @@ export default function App() {
             // 콘솔에 데이터 출력 (수정 필요)
         } catch (error) {
             console.error("Error fetching price:", error);
-        }
-    };
-
-    const pickImage = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.All,
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 1,
-        });
-
-        if (!result.cancelled) {
-            setImage(result.uri);
-            setScanned(false);
         }
     };
 
@@ -86,16 +65,6 @@ export default function App() {
                 <Button
                     title={"Tap to Scan Again"}
                     onPress={() => setScanned(false)}
-                />
-            )}
-            <Button
-                title="Pick an image from camera roll"
-                onPress={pickImage}
-            />
-            {image && (
-                <Image
-                    source={{ uri: image }}
-                    style={{ width: 400, height: 200 }}
                 />
             )}
         </View>
