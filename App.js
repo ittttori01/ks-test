@@ -1,73 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Button, Image, StyleSheet } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
 import { BarCodeScanner } from "expo-barcode-scanner";
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
-import ProductTable from "./components/ProductTable";
+import Home from "./components/Home";
+import ProductDetail from "./components/ProductDetail";
 
-const url = "https://e5ce-58-120-200-130.ngrok-free.app";
-
+const url = "https://5d7d-58-120-200-130.ngrok-free.app";
+const Stack = createStackNavigator();
 export default function App() {
-    const [hasPermission, setHasPermission] = useState(null);
-    const [scanned, setScanned] = useState(false);
-    const [extractedData, setExtractedData] = useState([]);
-
-    useEffect(() => {
-        (async () => {
-            const { status } = await BarCodeScanner.requestPermissionsAsync();
-            setHasPermission(status === "granted");
-        })();
-    }, []);
-
-    const handleBarCodeScanned = ({ type, data }) => {
-        setScanned(true);
-        const barcode = getPrice(data.trim());
-        alert(barcode);
-    };
-
-    const getPrice = async (barcode) => {
-        try {
-            const requestUrl = url + `/product/${barcode}`;
-            console.log(requestUrl);
-            await axios
-                .get(requestUrl)
-                .then((res) => {
-                    const { name, spec, price } = res.data;
-                    const data = [{ name, spec, price }];
-                    setExtractedData(data);
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
-            // 콘솔에 데이터 출력 (수정 필요)
-        } catch (error) {
-            console.error("Error fetching price:", error);
-        }
-    };
-
     return (
-        <View style={styles.container}>
-            {extractedData.length > 0 ? (
-                <View style={styles.imageContainer}>
-                    <ProductTable extractedData={extractedData} />
-                </View>
-            ) : (
-                <View style={styles.imageContainer}>
-                    <BarCodeScanner
-                        onBarCodeScanned={
-                            scanned ? undefined : handleBarCodeScanned
-                        }
-                        style={styles.image} // BarCodeScanner에 직접 스타일 적용
-                    />
-                </View>
-            )}
-            {scanned && (
-                <Button
-                    title={"Tap to Scan Again"}
-                    onPress={() => setScanned(false)}
-                />
-            )}
-        </View>
+        <NavigationContainer>
+            <Stack.Navigator initialRouteName="Home">
+                <Stack.Screen name="Home" component={Home} />
+                <Stack.Screen name="ProductDetail" component={ProductDetail} />
+            </Stack.Navigator>
+        </NavigationContainer>
     );
 }
 

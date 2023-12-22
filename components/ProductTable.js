@@ -5,14 +5,14 @@ const ProductTable = ({ extractedData }) => {
     return (
         <View style={styles.container}>
             {extractedData.map((product, index) => (
-                <View key={index} style={styles.productContainer}>
-                    <Text style={styles.label}>제품 명:</Text>
+                <View key={index} style={styles.container}>
+                    <Text style={styles.title}>제품 명:</Text>
                     <Text style={styles.value}>{product.name}</Text>
 
-                    <Text style={styles.label}>제품 이름:</Text>
+                    <Text style={styles.description}>규격:</Text>
                     <Text style={styles.value}>{product.spec}</Text>
 
-                    <Text style={styles.label}>제품 가격:</Text>
+                    <Text style={styles.priceContainer}>제품 가격:</Text>
                     <Text style={styles.value}>
                         {Number(product.price).toLocaleString()}
                     </Text>
@@ -22,38 +22,60 @@ const ProductTable = ({ extractedData }) => {
     );
 };
 
-export default ProductTable;
-
 const styles = StyleSheet.create({
-    text: {
+    container: {
+        backgroundColor: "#fff",
+        padding: 20,
+        borderRadius: 8,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: "bold",
+        marginBottom: 10,
+    },
+    description: {
+        fontSize: 16,
+        color: "#666",
+        marginBottom: 20,
+    },
+    priceContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 15,
+    },
+    currency: {
         fontSize: 20,
-        color: "#ffffff",
+        fontWeight: "bold",
+        marginRight: 5,
     },
-    tableContainer: {
-        width: "100%",
-        borderWidth: 1,
-        marginTop: 20,
+    amount: {
+        fontSize: 32,
+        fontWeight: "bold",
     },
-    tableHeader: {
-        backgroundColor: "#ffffff",
-        flexDirection: "row",
+    offer: {
+        backgroundColor: "#F2F2F2",
+        color: "#333333",
+        padding: 10,
+        borderRadius: 8,
+        marginBottom: 20,
     },
-    headerCell: {
-        flex: 1,
-        borderRightWidth: 1,
-        borderColor: "#000000",
-        padding: 8,
-        textAlign: "left",
+    subtitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+        marginBottom: 10,
     },
-    tableRow: {
-        backgroundColor: "#ffffff",
-        flexDirection: "row",
+    listContainer: {
+        marginLeft: 20,
     },
-    tableCell: {
-        flex: 1,
-        borderRightWidth: 1,
-        borderColor: "#000000",
-        padding: 8,
-        textAlign: "left",
+    listItem: {
+        fontSize: 16,
+        marginBottom: 5,
     },
 });
+
+export default ProductTable;
